@@ -1,0 +1,64 @@
+
+Manual de Usuario - Sistema de Gestión de Sensores y Modelos de Carros
+
+1. INTRODUCCIÓN
+Este sistema permite gestionar y analizar datos provenientes de sensores,
+almacenándolos en una base de datos en tiempo real (Firebase). Además, incluye
+una interfaz web para la visualización y análisis de datos, junto con la
+generación aleatoria de modelos de carros.
+
+2. REQUISITOS
+- Python 3.7 o superior
+- Flask
+- Firebase Admin SDK
+- Chart.js (para gráficos en la interfaz web)
+- Archivo JSON de credenciales para Firebase
+- Conexión a Internet
+
+3. INSTALACIÓN
+a. Clonar o descargar el proyecto.
+b. Instalar las dependencias de Python ejecutando:
+   pip install flask firebase-admin
+c. Asegurarse de tener el archivo JSON de credenciales de Firebase
+   y colocarlo en la ruta indicada en el script Python.
+
+4. EJECUCIÓN
+a. Iniciar la aplicación Flask con el comando:
+   python app.py
+b. Acceder a la interfaz web en:
+   http://127.0.0.1:5000/
+
+5. USO DE LA INTERFAZ WEB
+a. En la página principal:
+   - Seleccionar un sensor de la lista desplegable.
+   - Elegir una fecha asociada al sensor.
+   - Filtrar datos para visualizar un gráfico y una tabla con
+     los datos registrados.
+b. El gráfico muestra valores de HPS+ a lo largo del tiempo.
+c. La tabla lista los detalles como ID del vehículo, fecha y valor.
+
+6. API
+a. Endpoint: POST /api/sensor
+   - Descripción: Almacena datos enviados en formato JSON.
+   - Ejemplo de datos:
+     {
+       "id": "123",
+       "fecha": "2024-12-01",
+       "hora": "12:00:00",
+       "idsensor": "S1",
+       "valor": 23.5
+     }
+b. Endpoint: GET /api/fechas
+   - Parámetro: idsensor (obligatorio)
+   - Descripción: Obtiene las fechas asociadas al sensor indicado.
+c. Endpoint: GET /api/datos
+   - Parámetros: idsensor y fecha (obligatorios)
+   - Descripción: Recupera datos de un sensor en una fecha específica.
+
+7. CONSIDERACIONES
+a. Asegúrese de que Firebase esté correctamente configurado.
+b. El archivo CSS para estilos personalizados debe estar en la carpeta
+   static/css con el nombre style2.css.
+
+8. CONTACTO
+Para soporte, contactar al desarrollador RUSSELL.

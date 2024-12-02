@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style2.css') }}">
+    <title>Análisis de Sensores</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Análisis de Sensores</h1>
+    <form id="filtro-form">
+        <label for="idsensor">Seleccionar Sensor:</label>
+        <select id="idsensor" name="idsensor">
+            {% for sensor in sensores %}
+            <option value="{{ sensor }}">{{ sensor }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="fecha">Seleccionar Fecha:</label>
+        <select id="fecha" name="fecha">
+            <option value="" disabled selected>Selecciona una fecha</option>
+        </select>
+
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <h2>Gráfico de Datos</h2>
+    <canvas id="grafico"></canvas>
+
+    <h2>Datos Tabulados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Vehículo (ID)</th>
+                <th>Placa (ID Sensor)</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>HPS+</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-datos"></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('filtro-form');
+        const tabla = document.getElementById('tabla-datos');
+        const ctx = document.getElementById('grafico').getContext('2d');
+        let chart;
+
+        document.getElementById('idsensor').addEventListener('change', async function () {
+    const idsensor = this.value;
+    const fechaSelect = document.getElementById('fecha');
+
+    if (!idsensor) {
+        alert("Por favor selecciona un sensor.");
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`/api/fechas?idsensor=${idsensor}`);
+        const fechas = await respuesta.json();
+
+        if (respuesta.ok) {
+            fechaSelect.innerHTML = '<option value="" disabled selected>Selecciona una fecha</option>';
+            fechas.forEach(fecha => {
+                const option = document.createElement('option');
+                option.value = fecha;
+                option.textContent = fecha;
+                fechaSelect.appendChild(option);
+            });
+        } else {
+            alert(fechas.error || "Error al obtener las fechas disponibles.");
+        }
+    } catch (error) {
+        alert("Error al obtener las fechas disponibles.");
+    }
+});
+
+// Procesar datos al filtrar
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const idsensor = document.getElementById('idsensor').value;
+    const fecha = document.getElementById('fecha').value;
+
+    if (!idsensor || !fecha) {
+        alert("Por favor selecciona un sensor y una fecha.");
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`http://127.0.0.1:5000/api/datos?idsensor=${idsensor}&fecha=${fecha}`);
+        const datos = await respuesta.json();
+
+        if (respuesta.ok) {
+            // Actualizar la tabla
+            tabla.innerHTML = '';
+            datos.forEach(dato => {
+                const fila = `
+                    <tr>
+                        <td>${dato.id}</td>
+                        <td>${dato.idsensor}</td>
+                        <td>${dato.fecha}</td>
+                        <td>${dato.hora}</td>
+                        <td>${dato.valor}</td>
+                    </tr>
+                `;
+                tabla.innerHTML += fila;
+            });
+
+            // Actualizar el gráfico
+            const labels = datos.map(d => d.hora);
+            const valores = datos.map(d => parseFloat(d.valor));
+
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'HPS+',
+                        data: valores,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Hora' } },
+                        y: { title: { display: true, text: 'HPS+' } },
+                    }
+                }
+            });
+        } else {
+            alert(datos.error || "Error al obtener los datos.");
+        }
+    } catch (error) {
+        alert("Error al procesar los datos.");
+    }
+});
+    </script>
+</body>
+</html>

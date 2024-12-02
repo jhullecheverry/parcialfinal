@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+    <title>Datos del Sensor</title>
+</head>
+<body>
+    <h1>Enviar Datos del Sensor</h1>
+    <form id="sensorForm">
+        <label for="id">ID:</label>
+        <input type="text" id="id" name="id" value="{{ id_modelo }}" readonly><br><br>
+    
+        <label for="fecha">Fecha:</label>
+        <input type="text" id="fecha" name="fecha" value="{{ fecha }}" readonly><br><br>
+    
+        <label for="hora">Hora:</label>
+        <input type="text" id="hora" name="hora" value="{{ hora }}" readonly><br><br>
+    
+        <label for="idsensor">ID del Sensor:</label>
+        <input type="text" id="idsensor" name="idsensor" required><br><br>
+    
+        <label for="valor">Valor:</label>
+        <input type="number" id="valor" name="valor" required><br><br>
+    
+        <button type="button" id="submitButton">Enviar</button>
+    </form>
+    
+    <script>
+        // Capturar el formulario y manejar el envío
+        document.getElementById('submitButton').addEventListener('click', function () {
+            // Obtener los valores del formulario
+            const id = document.getElementById('id').value;
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+            const idsensor = document.getElementById('idsensor').value;
+            const valor = document.getElementById('valor').value;
+            
+            // Crear el objeto JSON
+            const datos = {
+                id: id,
+                fecha: fecha,
+                hora: hora,
+                idsensor: idsensor,
+                valor: parseFloat(valor)
+            };
+
+            // Enviar la solicitud con fetch
+            fetch('/api/sensor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error en la solicitud');
+                }
+            })
+            .then(data => {
+                alert(data.mensaje || 'Datos enviados correctamente');
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
